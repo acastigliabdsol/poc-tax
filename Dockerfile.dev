@@ -1,0 +1,23 @@
+# Dockerfile para ambiente de desarrollo Rust con Cap'n Proto
+FROM rust:1.92-slim-bookworm
+
+# Instalar dependencias del sistema
+# - capnproto: compilador de esquemas
+# - libcapnp-dev: headers para desarrollo
+# - pkg-config, libssl-dev: necesarios para crates como diesel/sqlx y comunicación segura
+# - build-essential: para compilación de dependencias nativas
+RUN apt-get update && apt-get install -y \
+    capnproto \
+    libcapnp-dev \
+    pkg-config \
+    libssl-dev \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN cargo install cargo-tarpaulin
+
+WORKDIR /app
+
+# El contenedor se mantendrá vivo para desarrollo
+CMD ["sleep", "infinity"]

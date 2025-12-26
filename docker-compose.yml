@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Ambiente de desarrollo Rust
+  tax-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - cargo-cache:/usr/local/cargo/registry
+    environment:
+      - DATABASE_URL=postgres://user:password@db:5432/tax_db
+      - REDIS_URL=redis://cache:6379
+      - RUST_LOG=debug
+    depends_on:
+      - db
+      - cache
+    networks:
+      - tax-network
+
+  # Base de Datos Relacional (PostgreSQL)
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tax_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - tax-network
+
+  # Cache (Redis)
+  cache:
+    image: redis:8.4-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - tax-network
+
+networks:
+  tax-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  cargo-cache:

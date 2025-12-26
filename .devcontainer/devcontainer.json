@@ -1,0 +1,17 @@
+{
+  "name": "Tax Engine Development",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "tax-engine",
+  "workspaceFolder": "/app",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "capnproto.capnproto-language-server",
+        "fill-labs.dependi"
+      ]
+    }
+  },
+  "remoteUser": "root"
+}
