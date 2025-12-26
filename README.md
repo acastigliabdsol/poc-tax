@@ -66,36 +66,82 @@ docker-compose exec tax-engine bash
 - `capnp compile -orust schema.capnp`: Compilar esquemas de Cap'n Proto.
 - `cargo test`: Ejecutar toda la suite de pruebas (Unitarias, Integración y E2E).
 
-## Pruebas (Testing)
+## Performance Testing
 
 El proyecto cuenta con una estrategia de pruebas multinivel para garantizar la robustez del motor:
 
-### Ejecución de Pruebas
-Para ejecutar todas las pruebas dentro del contenedor:
+#### Ejecutar
+
+**Prerequisitos**: El servidor RPC debe estar corriendo en `127.0.0.1:50051` (o configurar `RPC_ADDR`).
+
 ```bash
-cargo test
+# Iniciar el servidor
+cargo run --release
+
+# En otra terminal
+RPC_ADDR=192.168.1.100:50051 target/release/load-test --users 100 --run-time 30s
 ```
 
-### Tipos de Pruebas
+#### Métricas Reportadas
 
-1. **Pruebas Unitarias** (`src/**`):
-   - **Objetivo**: Verificar la lógica interna de componentes individuales (Calculadores, Orquestador).
-   - **Aislamiento**: Se utilizan *mocks* para simular dependencias de infraestructura.
-   - **Velocidad**: Ejecución ultra-rápida.
+La prueba genera un reporte detallado que incluye:
 
-2. **Pruebas de Integración** (`tests/integration_test.rs`):
-   - **Objetivo**: Validar la interacción entre las diferentes capas del microservicio (Repositorio -> Cache -> Orquestador).
-   - **Infraestructura**: Utiliza `testcontainers` para levantar instancias reales de **PostgreSQL** y **Redis** de forma automática durante la prueba.
-   - **Alcance**: Verifica que las consultas a BD y la lógica de cacheo funcionen correctamente juntas.
+| Métrica | Descripción |
+|---------|-------------|
+| Total Requests | Número total de solicitudes procesadas |
+| RPS | Requests por segundo |
+| Latencia Min/Avg/Max | Latencias en microsegundos |
+| Distribución de Latencia | Histograma con buckets: <1ms, 1-5ms, 5-10ms, >10ms |
+| Verificación RT-002 | Indica si se cumplen los requisitos de performance |
 
-3. **Pruebas End-to-End (E2E)** (`tests/e2e_test.rs`):
-   - **Objetivo**: Validar el flujo completo desde la red hasta la base de datos.
-   - **Alcance**: Inicia el servidor RPC, conecta un cliente real de Cap'n Proto y realiza una transacción completa.
-   - **Diferencia**: A diferencia de la integración, valida la capa de comunicación (red/RPC), serialización y el ciclo de vida real del servicio.
+#### Arquitectura del Load Test
 
-### Cobertura (Coverage)
-Aunque `cargo test` no muestra cobertura por defecto, puedes instalar `cargo-tarpaulin` para generar reportes:
+El load test utiliza un **pool de conexiones** con múltiples workers (uno por CPU core) para:
 
-```bash
-cargo tarpaulin --ignore-tests
+1. Evitar cuellos de botella en una única conexión RPC
+2. Simular tráfico realista desde múltiples clientes
+3. Maximizar throughput sin saturar un solo worker
+
+```mermaid
+graph TB
+    subgraph LoadTest
+        direction TB
+        G[("🦆 Goose<br/>1000+ Virtual Users")]
+    end
+
+    subgraph ConnectionPool
+        direction LR
+        W1["⚡ Worker 1"]
+        W2["⚡ Worker 2"]
+        W3["⚡ Worker 3"]
+        WN["⚡ Worker N"]
+    end
+
+    subgraph TaxEngine
+        direction TB
+        RPC["📡 Cap'n Proto RPC<br/>:50051"]
+        subgraph Processing["Request Processing"]
+            CALC["🧮 Tax Calculator"]
+            CACHE["💾 Redis Cache"]
+            DB[("🗄️ PostgreSQL")]
+        end
+    end
+
+    G ==> ConnectionPool
+    W1 & W2 & W3 & WN -->|"TCP/Cap'n Proto"| RPC
+    RPC --> CALC
+    CALC <-.->|"L1/L2 Cache"| CACHE
+    CALC <-.->|"Fallback"| DB
+
+    classDef gooseStyle fill:#1565c0,stroke:#0d47a1,color:#fff,stroke-width:2px
+    classDef poolStyle fill:#ff8f00,stroke:#e65100,color:#fff,stroke-width:2px
+    classDef serverStyle fill:#2e7d32,stroke:#1b5e20,color:#fff,stroke-width:2px
+    classDef processStyle fill:#43a047,stroke:#2e7d32,color:#fff
+    classDef storageStyle fill:#5c6bc0,stroke:#3949ab,color:#fff
+
+    class G gooseStyle
+    class W1,W2,W3,WN poolStyle
+    class RPC serverStyle
+    class CALC,CACHE processStyle
+    class DB storageStyle
 ```
