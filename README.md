@@ -82,6 +82,8 @@ cargo run --release
 RPC_ADDR=192.168.1.100:50051 target/release/load-test --users 100 --run-time 30s
 ```
 
+Para resultados y reportes de pruebas recientes, consulta [PERFORMANCE.md](PERFORMANCE.md).
+
 #### Métricas Reportadas
 
 La prueba genera un reporte detallado que incluye:
