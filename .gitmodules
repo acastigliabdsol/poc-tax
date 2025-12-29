@@ -1,0 +1,4 @@
+[submodule "client/java/capnproto-java-rpc"]
+	path = client/java/capnproto-java-rpc
+	url = https://github.com/vaci/capnproto-java-rpc.git
+	ignore = all

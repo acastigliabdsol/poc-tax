@@ -9,7 +9,8 @@
         "rust-lang.rust-analyzer",
         "tamasfe.even-better-toml",
         "capnproto.capnproto-language-server",
-        "fill-labs.dependi"
+        "fill-labs.dependi",
+        "vscjava.vscode-java-pack"
       ]
     }
   },
