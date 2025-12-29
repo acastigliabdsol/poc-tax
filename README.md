@@ -66,6 +66,13 @@ docker-compose exec tax-engine bash
 - `capnp compile -orust schema.capnp`: Compilar esquemas de Cap'n Proto.
 - `cargo test`: Ejecutar toda la suite de pruebas (Unitarias, Integración y E2E).
 
+## Clientes
+
+Este repositorio incluye clientes de ejemplo en varios lenguajes. Consulte la documentación específica de cada cliente:
+
+- Cliente Java: [client/java/README.md](client/java/README.md)
+- Cliente JavaScript: [client/javascript/README.md](client/javascript/README.md)
+
 ## Performance Testing
 
 El proyecto cuenta con una estrategia de pruebas multinivel para garantizar la robustez del motor:
