@@ -1,49 +1,30 @@
-# Dockerfile para ambiente de desarrollo Rust con Cap'n Proto
 FROM rust:1.92-slim-bookworm
 
-# Instalar dependencias del sistema
-# - capnproto: compilador de esquemas
-# - libcapnp-dev: headers para desarrollo
-# - pkg-config, libssl-dev: necesarios para crates como diesel/sqlx y comunicación segura
-# - build-essential: para compilación de dependencias nativas
+# 1. Dependencias del sistema 
 RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libssl-dev \
-    build-essential \
-    git \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+    pkg-config libssl-dev build-essential g++ git wget curl ca-certificates gnupg \
+    libffi-dev libbz2-dev libreadline-dev libsqlite3-dev zlib1g-dev \
+    nodejs npm 
 
-RUN cargo install cargo-tarpaulin
-
+# 2. Cap'n Proto C++
 RUN wget https://capnproto.org/capnproto-c++-1.3.0.tar.gz -O /tmp/capnproto.tar.gz && \
-    cd /tmp && \
-    tar zxf capnproto.tar.gz && \
-    cd capnproto-c++-1.3.0 && \
-    ./configure && \
-    make check && \
-    make install && \
+    cd /tmp && tar zxf capnproto.tar.gz && cd capnproto-c++-1.3.0 && \
+    ./configure && make -j$(nproc) install && \
     rm -rf /tmp/capnproto.tar.gz /tmp/capnproto-c++-1.3.0
 
+# 3. Java 25
 RUN wget https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.deb -O /tmp/jdk.deb && \
     apt-get install -y /tmp/jdk.deb && \
     rm /tmp/jdk.deb
 
-#RUN cd /tmp && \
-#    git clone https://github.com/capnproto/capnproto-java.git && \
-#    cd capnproto-java && \
-#    make && \
-#    make install
-#    rm -rf /tmp/capnproto-java
-
+# 4. Cap'n Proto Java RPC
 RUN cd /tmp && \
     git clone https://github.com/vaci/capnproto-java-rpc.git && \
     cd capnproto-java-rpc && \
-    make && \
-    make install && \
+    make && make install && \
     rm -rf /tmp/capnproto-java-rpc
 
-WORKDIR /app
+RUN cargo install cargo-tarpaulin
 
-# El contenedor se mantendrá vivo para desarrollo
+WORKDIR /app
 CMD ["sleep", "infinity"]

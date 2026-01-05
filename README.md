@@ -71,7 +71,7 @@ docker-compose exec tax-engine bash
 Este repositorio incluye clientes de ejemplo en varios lenguajes. Consulte la documentación específica de cada cliente:
 
 - Cliente Java: [client/java/README.md](client/java/README.md)
-- Cliente JavaScript: [client/javascript/README.md](client/javascript/README.md)
+- Cliente Javascript: [client/javascript/README.md](client/javascript/README.md)
 
 ## Performance Testing
 

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "capnp-es": ["./src/index.ts"],
+      "capnp-es/compiler": ["./src/compiler/index.ts"],
+      "capnp-es/capnp/*": ["./src/capnp/*.ts"],
+      "src/*": ["./src/*"],
+      "test/*": ["./test/*"]
+    }
+  },
+  "include": ["src", "test", "playground"],
+  "exclude": ["**/*.d.ts"]
+}

@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/client.js",
+    "capnpc": "npx capnp-es ./src/capnp/references.capnp -ojs,ts,dts"
+  },
+  "type": "module",
+  "dependencies": {
+    "capnp-es": "^0.0.11"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
