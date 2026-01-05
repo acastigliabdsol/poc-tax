@@ -83,7 +83,7 @@ El proyecto cuenta con una estrategia de pruebas multinivel para garantizar la r
 
 ```bash
 # Iniciar el servidor
-cargo run --release
+cargo run --release --bin tax-manager
 
 # En otra terminal
 RPC_ADDR=192.168.1.100:50051 target/release/load-test --users 100 --run-time 30s
